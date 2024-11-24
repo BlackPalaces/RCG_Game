@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Game</title>
+    <!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-firestore.js"></script>
+
+<script>
+  // กำหนดค่า Firebase Config ของคุณที่นี่
+  const firebaseConfig = {
+  apiKey: "AIzaSyB1_PqQmBv8unlsrcspWfwgVbpTPxy5Ais",
+  authDomain: "rcg-game.firebaseapp.com",
+  projectId: "rcg-game",
+  storageBucket: "rcg-game.appspot.com",
+  messagingSenderId: "512076336099",
+  appId: "1:512076336099:web:4324fac4a5c1b9d3adeed6"
+};
+
+  // กำหนด Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+    <script>
+        function clearForm() {
+            document.getElementById('name').value = '';
+            document.getElementById('pic').value = '';
+            document.getElementById('tag').value = '';
+            document.getElementById('about').value = '';
+            document.getElementById('linkdl').value = '';
+            document.getElementById('gameshow').value = '';
+
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #7e7e7e;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: auto;
+        }
+
+        form {
+            background-color: #dddddd;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 80px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        header {
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 50px;
+            width: 100%;
+            background-color: #444444;
+            padding: 10px 20px;
+            /* เพิ่ม padding เพื่อให้มีพื้นที่ว่างข้างใน */
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .custom-image {
+            width: 70px;
+            height: auto;
+            /* ทำให้ความสูงปรับตามขนาดกว้าง */
+        }
+
+        .color-text {
+            color: rgb(254, 254, 243);
+        }
+    </style>
+
+</head>
+
+<body>
+    <header>
+        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+            <div class="column" style="margin-left: 20px; margin-top: -20px;">
+                <!-- ส่วนที่ต้องการจัดทางซ้าย -->
+                <img class="custom-image" src="../pic/RCG.png">
+                <h1 class="color-text" style="margin-top: -50px; margin-left: 70px;">Game</h1>
+            </div>
+            <div class="column" style="margin-left: 0px;">
+                <!-- ส่วนที่ต้องการจัดทางขวา -->
+                <a href="RCG-Gamemanager.html"><strong style="font-size: 25px; color: #4caf50;">BACK</strong></a>
+            </div>
+        </div>
+    </header>
+
+    <form id="gameForm">
+        <h1 for="name">ADD-NEWGAME</h1>
+
+        <label for="gameid">Id:</label>
+        <input type="text" id="gameid" name="gameid" required placeholder="ไอดีเกมล่าสุดจาก Firebase"><br>
+
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required placeholder="ชื่อเกม"><br>
+
+        <label for="pic">Pic:</label>
+        <input type="text" id="pic" name="pic" required placeholder="ภาพปกเกม"><br>
+
+        <label for="gameshow">ภาพตัวอย่าง:</label>
+        <input type="text" id="gameshow" name="gameshow" required
+            placeholder="ใส่แบบนี้ ลิ้งก์ที่1,ลิ้งที่2,ลิ้งที่3,..."><br>
+
+        <label for="tag">Tag:</label>
+        <input type="text" id="tag" name="tag" required
+            placeholder="ตัวแรกพิมพ์ใหญ่ เช่น Horror หรือ Action ใส่ได้ประเภทเดียว"><br>
+
+        <label for="about">About:</label>
+        <textarea id="about" name="about" rows="6" cols="50" required
+            placeholder="เกมนี้เกี่ยวกับอะไร เนื้อเรื่องเป็นอย่างไร"></textarea></textarea><br>
+
+        <label for="linkdl">LinkDownload:</label>
+        <input type="linkdl" id="linkdl" name="linkdl" required
+            placeholder="ลิ้งก์สำหรับดาวน์โหลด หรือ ข้อมูลเพิ่มเติม"><br>
+
+        Status:
+        <select name="Status" id="status">
+            <option value="NONE" selected>None</option>
+            <option value="ADVICE">Advice</option>
+        </select><br><br>
+
+        <button type="button" onclick="submitForm()">Submit</button>
+    </form>
+
+   
+<script>
+    function submitForm() {
+  const gameshowInput = document.getElementById('gameshow').value;
+  const gameshowArray = gameshowInput ? gameshowInput.split(',') : [];
+  const makeid = document.getElementById('gameid').value;
+
+  // ทำการเพิ่มข้อมูลใหม่ลงใน Firestore โดยกำหนด ID เอง
+  db.collection('Games').doc(makeid).set({
+    Name: document.getElementById('name').value,
+    Pic: document.getElementById('pic').value,
+    Tag: document.getElementById('tag').value,
+    About: document.getElementById('about').value,
+    Rate: 0,
+    Status: document.getElementById('status').value,
+    Gameshow: gameshowArray,
+    Linkdl: document.getElementById('linkdl').value,
+  })
+    .then(() => {
+      console.log("Document written with ID: ", makeid);
+      alert('Game added successfully!');
+      clearForm();
+      // Optionally, you can redirect the user or perform other actions after successful submission
+    })
+    .catch(error => {
+      console.error("Error adding document: ", error);
+      alert('Error adding game. Please try again.');
+    });
+}
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameManager</title>
+    <script>
+        function clearForm() {
+            document.getElementById('name').value = '';
+            document.getElementById('pic').value = '';
+            document.getElementById('tag').value = '';
+            document.getElementById('about').value = '';
+            document.getElementById('status').value = '';
+        }
+    </script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-firestore.js"></script>
+
+    <script>
+        // กำหนดค่า Firebase Config ของคุณที่นี่
+        const firebaseConfig = {
+            apiKey: "AIzaSyB1_PqQmBv8unlsrcspWfwgVbpTPxy5Ais",
+            authDomain: "rcg-game.firebaseapp.com",
+            projectId: "rcg-game",
+            storageBucket: "rcg-game.appspot.com",
+            messagingSenderId: "512076336099",
+            appId: "1:512076336099:web:4324fac4a5c1b9d3adeed6"
+        };
+
+        // กำหนด Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #7e7e7e;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: auto;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 250px;
+            padding: 8px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            display: inline-block;
+        }
+
+        .form-stlye {
+            color: #fff;
+            width: 400px;
+            border-radius: 4px;
+            margin-top: 50px;
+            margin-left: 250px;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 9px;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+            /* ไม่จำเป็นต้องกำหนด margin-left และ display: inline; ในปุ่ม */
+        }
+
+        header {
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 50px;
+            width: 100%;
+            background-color: #444444;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            /* เพิ่ม padding เพื่อให้มีพื้นที่ว่างข้างใน */
+        }
+
+        a {
+            color: #201f1f;
+            text-decoration: none;
+        }
+
+        .custom-image {
+            width: 70px;
+            height: auto;
+            /* ทำให้ความสูงปรับตามขนาดกว้าง */
+        }
+
+        .color-text {
+            color: rgb(254, 254, 243);
+        }
+
+        table {
+            position: center;
+            border: 2px solid black;
+            width: 70%;
+            text-align: center;
+            border-collapse: collapse;
+            border-spacing: 0;
+            margin-top: 0px;
+            overflow: auto;
+            margin-top: 150px;
+        }
+
+        th,
+        td {
+            border: 1px solid black;
+            padding: 8px;
+            flex: 1;
+        }
+
+        .search-container {
+            height: 50;
+            display: flex;
+            margin-top: -60px;
+
+        }
+    </style>
+
+</head>
+
+<body>
+    <header>
+        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+            <div class="column" style="margin-left: 20px; margin-top: -20px;">
+                <!-- ส่วนที่ต้องการจัดทางซ้าย -->
+                <img class="custom-image" src="../pic/RCG.png">
+                <h1 class="color-text" style="margin-top: -50px; margin-left: 70px;">Game</h1>
+                <a href="http://localhost:3000/" target="_blank"><strong
+                        style="margin-left: 10px; font-size: 12px; color: #ffffff;">Json_File</strong></a>
+            </div>
+            <div class="column" style="margin-left: 0px;">
+                <!-- ส่วนที่ต้องการจัดทางขวา -->
+                <a href="RCG-AddGame.html"><strong style="font-size: 25px; color: #4caf50;">NewGame</strong></a><br><br>
+
+            </div>
+        </div>
+        <div class="search-container">
+            <form class="form-stlye" id="search-form">
+                <input type="text" id="search-input" placeholder="ค้นหา..." required>
+                <button type="button" onclick="searchGames()">ค้นหา</button>
+            </form>
+        </div>
+    </header>
+
+    <table id="gameTable">
+        <tr>
+            <th>ลำดับ</th>
+            <th>รูปภาพ</th>
+            <th>ชื่อเกม</th>
+            <th>หมวดหมู่</th>
+            <th>เรทติ้ง</th>
+            <th>สถานะ</th>
+            <th>แก้ไข/ลบ</th>
+        </tr>
+    </table>
+
+
+    <script>
+        // ส่งคำขอ GET ไปยัง Firestore เพื่อดึงข้อมูลปัจจุบัน
+        db.collection('Games').get()
+            .then(querySnapshot => {
+                let data = [];
+                querySnapshot.forEach(doc => {
+                    data.push({ id: doc.id, ...doc.data() });
+                });
+
+                let tableHTML = ''; // สร้างตัวแปรเก็บ HTML ของตาราง
+
+                data.forEach(val => {
+                    tableHTML += `
+        <tr>
+          <td>${val.id}</td>
+          <td><img src="${val.Pic}" style="height: 100px; width: auto;"></td>
+          <td>${val.Name}</td>
+          <td>${val.Tag}</td>
+          <td>${val.Rate}</td>
+          <td>${val.Status}</td>
+          <td>
+            <a href="RCG-Editgame.html?ID=${val.id}">Edit</a>
+            <a href="#" onclick="deleteGame('${val.id}')">| Delete</a>
+          </td>
+        </tr>
+      `;
+                });
+
+                // เข้าถึง <table> element แล้วกำหนด innerHTML เพื่อแทนที่ HTML ของตาราง
+                document.getElementById('gameTable').innerHTML += tableHTML;
+            })
+            .catch(error => {
+                console.log(error);
+                alert('Error fetching current data. Please try again.');
+            });
+    </script>
+
+    <script>
+        function deleteGame(id) {
+            const confirmDelete = window.confirm(`Are you sure you want to delete game with ID ${id}?`);
+
+            if (confirmDelete) {
+                // ทำการลบข้อมูลจาก Firestore โดยใช้ ID
+                db.collection('Games').doc(id).delete()
+                    .then(() => {
+                        console.log('Document successfully deleted!');
+                        alert('Game deleted successfully!');
+                        location.reload(); // รีเฟรชหน้าเว็บ
+                    })
+                    .catch(error => {
+                        console.error('Error deleting document: ', error);
+                        alert('Error deleting game. Please try again.');
+                    });
+            } else {
+                // alert('Deletion canceled.');
+            }
+        }
+    </script>
+
+    <script>
+        function searchGames() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            if (!searchTerm.trim()) {
+                location.reload(); // รีเฟรชหน้าเว็บ
+                return;
+            }
+
+            // ส่งคำขอ GET ไปยัง Firestore เพื่อดึงข้อมูลทั้งหมด
+            db.collection('Games').get()
+                .then(querySnapshot => {
+                    let data = [];
+                    querySnapshot.forEach(doc => {
+                        data.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    let filteredData = data.filter(val => val.Name.toLowerCase().includes(searchTerm));
+
+                    let tableHTML = ''; // สร้างตัวแปรเก็บ HTML ของตาราง
+
+                    filteredData.forEach(val => {
+                        tableHTML += `
+          <tr>
+            <td>${val.id}</td>
+            <td><img src="${val.Pic}" style="height: 100px; width: auto;"></td>
+            <td>${val.Name}</td>
+            <td>${val.Tag}</td>
+            <td>${val.Rate}</td>
+            <td>${val.Status}</td>
+            <td>
+              <a href="Editgame.html?ID=${val.id}">Edit</a>
+              <a href="#" onclick="deleteGame('${val.id}')">| Delete</a>
+            </td>
+          </tr>
+        `;
+                    });
+
+                    // เข้าถึง <table> element แล้วกำหนด innerHTML เพื่อแทนที่ HTML ของตาราง
+                    document.getElementById('gameTable').innerHTML = tableHTML;
+                })
+                .catch(error => {
+                    console.log(error);
+                    alert('Error fetching data. Please try again.');
+                });
+        }
+    </script>
+</body>
+
+</html>
