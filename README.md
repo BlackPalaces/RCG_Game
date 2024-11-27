@@ -44,7 +44,7 @@ Follow these steps to install and run the app:
    npm install -g expo-cli
 2. **Clone the Repository**
     ```bash
-   git clone https://github.com/yourusername/RCG_Game-ReactNativeApp.git
+   git clone https://github.com/BlackPalaces/RCG_Game-ReactNativeApp.git
 4. **Install Dependencies**
    ```bash
    npm install
